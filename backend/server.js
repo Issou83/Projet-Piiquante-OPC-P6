@@ -5,6 +5,7 @@ const http = require('http');
 //Importation d'Express dans le serveur
 const app = require('./app');
 
+// Fonction pour normaliser la valeur du port
 //Renvoie un port valide, qu'il soit fourni sous la forme d'un numéro ou d'une chaîne
 const normalizePort = val => {
     const port = parseInt(val, 10)
@@ -59,8 +60,7 @@ const server = http.createServer(app);
 // En cas d'erreur, appeler la fonction errorHandler
 server.on('error', errorHandler);
 
-/* Écouter les événements "listening", également enregistré, 
-consignant le port ou le canal nommé sur lequel le serveur s'exécute dans la console*/
+// Écouter les événements "listening"
 server.on('listening', () => {
     const address = server.address();
     const bind = typeof address === 'string' ? 'pipe' + address : 'port' + port;

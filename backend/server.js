@@ -1,12 +1,12 @@
 //Importation du package HTTP natif de Node
-
 const http = require('http');
 
-/*Fonction qui sera exécutée à chaque appel effectué vers ce serveur
-Elle reçoit les objets request et response en tant qu'arguments*/
-const server = http.createServer((req, res) => {
-    res.end('Voilà la réponse du serveur !');
-});
+//Importation d'Express dans le serveur
+const app = require('./app');
+
+/*La methode set d'express sera utilisé à chaque appel effectué vers ce serveur*/
+app.set('port', process.env.PORT || 3000);
+const server = http.createServer(app)
 
 /*Ecoute du serveur 
 -Soit par la variable d'environnement du port grace à "process.env.PORT": 

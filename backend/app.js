@@ -1,9 +1,23 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const app = express();
-//Gérer la requête venant de l'application front-end, on a besoin d'en extraire le corps JSON
-app.use(express.json());
+// On importe les bibliothèques 'express', 'body-parser', 'mongoose', 'path'
+const express = require("express");
+// const bodyParser = require("body-parser");
 
+
+/*Mongoose est un package qui facilite les interactions avec notre base de données MongoDB. 
+Il nous permet de :
+*valider le format des données ;
+*gérer les relations entre les documents ;
+*communiquer directement avec la base de données pour la lecture et l'écriture des documents.*/
+
+//Le package Mongoose facilite les interactions entre votre application Express et votre base de données MongoDB.
+const mongoose = require("mongoose");
+
+const userRoutes = require('./routes/user');
+const saucesRoutes = require("./routes/sauces");
+const path = require('path');
+
+// On initialise l'application express
+const app = express();
 
 // On se connecte à la base de données MongoDB
 mongoose.connect("mongodb+srv://issou:8383@cluster0.k4dphx2.mongodb.net/?retryWrites=true&w=majority",
@@ -12,7 +26,13 @@ mongoose.connect("mongodb+srv://issou:8383@cluster0.k4dphx2.mongodb.net/?retryWr
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
+/*-------------------------------------------------------------------------------------------------------*/  
+//La méthode app.use() vous permet d'attribuer un middleware à une route spécifique de votre application.
 
+
+/*Avec ceci, Express prend toutes les requêtes qui ont comme 
+//Content-Type  application/json  et met à disposition leur  body  directement sur l'objet req*/
+app.use(express.json());
 
 
 /*Pour permettre des requêtes cross-origin (et empêcher des erreurs CORS), des headers spécifiques de 
@@ -26,19 +46,21 @@ Configurer les bons headers sur l'objet réponse permet l'envoi et la réception
 // On autorise les requêtes CORS (Cross-Origin Resource Sharing) depuis n'importe quelle origine
 //Le middleware ne prend pas d'adresse en premier paramètre, afin de s'appliquer à toutes les routes
 app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-    next();
-  });
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  next();
+});
 
+// On expose le répertoire 'images' pour les requêtes HTTP
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
-  app.post('/api/stuff', (req, res, next) => {
-    console.log(req.body);
-    res.status(201).json({
-      message: 'Objet créé !'
-    });
-  });
+// On utilise les routes définies pour les sauces et l'authentification
+app.use('/api/sauces', saucesRoutes);
+app.use('/api/auth', userRoutes);
 
+// On utilise le parseur de corps de requête pour extraire les données JSON
+// app.use(bodyParser.json());
 
+// On exporte l'application express
 module.exports = app;

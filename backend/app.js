@@ -1,7 +1,19 @@
 const express = require('express');
-
-const app = express();
 const mongoose = require('mongoose');
+const app = express();
+//Gérer la requête venant de l'application front-end, on a besoin d'en extraire le corps JSON
+app.use(express.json());
+
+
+// On se connecte à la base de données MongoDB
+mongoose.connect("mongodb+srv://issou:8383@cluster0.k4dphx2.mongodb.net/?retryWrites=true&w=majority",
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
+  .then(() => console.log("Connexion à MongoDB réussie !"))
+  .catch(() => console.log("Connexion à MongoDB échouée !"));
+
+
+
 
 /*Pour permettre des requêtes cross-origin (et empêcher des erreurs CORS), des headers spécifiques de 
 contrôle d'accès doivent être précisés pour tous vos objets de réponse.*/
@@ -20,23 +32,13 @@ app.use((req, res, next) => {
     next();
   });
 
-app.use((req, res, next) => {
-  console.log('Requête reçue !');
-  next();
-});
 
-app.use((req, res, next) => {
-  res.status(201);
-  next();
-});
+  app.post('/api/stuff', (req, res, next) => {
+    console.log(req.body);
+    res.status(201).json({
+      message: 'Objet créé !'
+    });
+  });
 
-app.use((req, res, next) => {
-  res.json({ message: 'Votre requête a bien été reçue !' });
-  next();
-});
-
-app.use((req, res, next) => {
-  console.log('Réponse envoyée avec succès !');
-});
 
 module.exports = app;

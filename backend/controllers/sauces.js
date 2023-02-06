@@ -38,40 +38,49 @@ exports.createSauces = (req, res, next) => {
 exports.modifySauces = (req, res, next) => {
     // Récupère l'ID de la sauce à partir des paramètres de la requête.
     const sauceId = req.params.id;
-    
-    // Trouve la sauce dans la base de données en utilisant son ID.
-    Sauces.findOne({ _id: sauceId })
-      .then((sauce) => {
-        // Si aucune sauce n'a été trouvée, renvoie une erreur 404 avec un message d'erreur.
-        if (!sauce) {
-          return res.status(404).json({ error: "Sauce inéxistante" });
-        }
-  
-        // Supprime l'ancienne image associée à la sauce.
-        const oldImagePath = `${process.cwd()}/images/${sauce.imageUrl.split("/images/")[1]}`;
-        fs.unlink(oldImagePath, (error) => {
-          if (error) {
-            console.error(error);
-          }
-        });
-  
-        // Si une nouvelle image a été téléchargée avec la requête, la ajoute à l'objet "sauceObject".
+     // Si une nouvelle image a été téléchargée avec la requête, la ajoute à l'objet "sauceObject".
         // Sinon, ajoute simplement les autres données de la requête à l'objet "sauceObject".
         //L'opérateur spread ... est utilisé pour faire une copie de tous les éléments de req.body
         const saucesObject = req.file ? {
-            //L'opérateur spread ... est utilisé pour faire une copie de tous les éléments de req.body
-          ...JSON.parse(req.body.sauce), 
-          imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+          //L'opérateur spread ... est utilisé pour faire une copie de tous les éléments de req.body
+        ...JSON.parse(req.body.sauce), 
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+      }
+      : { ...req.body };
+
+      // Supprime la propriété "_userId" de l'objet "sauceObject".
+      delete saucesObject._userId;
+    // Trouve la sauce dans la base de données en utilisant son ID.
+    Sauces.findOne({ _id: sauceId })
+
+
+      .then((sauce) => {
+        // Si aucune sauce n'a été trouvée, renvoie une erreur 404 avec un message d'erreur.
+        if (sauce.userId != req.auth.userId) {
+          return res.status(404).json({ error: "Sauce inéxistante" });
+
+        } else if (req.file) {
+          const filename = sauce.imageUrl.split("/images/")[1]
+          fs.unlink(`images/${filename}`, error => {
+            if (error) 
+            throw error
+          })
         }
-        : { ...req.body };
   
-        // Supprime la propriété "_userId" de l'objet "sauceObject".
-        delete saucesObject._userId;
+        // Supprime l'ancienne image associée à la sauce.
+        // const oldImagePath = `${process.cwd()}/images/${sauce.imageUrl.split("/images/")[1]}`;
+        // fs.unlink(oldImagePath, (error) => {
+        //   if (error) {
+        //     console.error(error);
+        //   }
+        // });
+  
+       
   
         // Si l'utilisateur actuel n'est pas le propriétaire de la sauce, renvoie une erreur 401 avec un message d'erreur.
-        if (sauce.userId != req.auth.userId) {
-          res.status(401).json({ message: "Vous n'etes pas authorisé à modifer cette sauce" });
-        } else {
+        // if (sauce.userId != req.auth.userId) {
+        //   res.status(401).json({ message: "Vous n'etes pas authorisé à modifer cette sauce" });
+        // } else {
           // Met à jour la sauce dans la base de données en utilisant les données de "sauceObject".
           Sauces.updateOne(
             { _id: sauceId },
@@ -85,7 +94,7 @@ exports.modifySauces = (req, res, next) => {
               // Renvoie une erreur si la mise à jour a échoué.
               res.status(401).json({ error });
             });
-        }
+        // }
 
   
     })

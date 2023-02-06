@@ -2,6 +2,12 @@
 const express = require("express");
 // const bodyParser = require("body-parser");
 
+const dotenv = require("dotenv");
+dotenv.config({
+  path: ".env"
+});
+
+
 
 /*Mongoose est un package qui facilite les interactions avec notre base de données MongoDB. 
 Il nous permet de :
@@ -20,7 +26,7 @@ const path = require('path');
 const app = express();
 
 // On se connecte à la base de données MongoDB
-mongoose.connect("mongodb+srv://issou:8383@cluster0.k4dphx2.mongodb.net/?retryWrites=true&w=majority",
+mongoose.connect(process.env.MONGO_DB,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))

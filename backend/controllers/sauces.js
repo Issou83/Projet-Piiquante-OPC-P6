@@ -66,22 +66,7 @@ exports.modifySauces = (req, res, next) => {
             throw error
           })
         }
-  
-        // Supprime l'ancienne image associée à la sauce.
-        // const oldImagePath = `${process.cwd()}/images/${sauce.imageUrl.split("/images/")[1]}`;
-        // fs.unlink(oldImagePath, (error) => {
-        //   if (error) {
-        //     console.error(error);
-        //   }
-        // });
-  
-       
-  
-        // Si l'utilisateur actuel n'est pas le propriétaire de la sauce, renvoie une erreur 401 avec un message d'erreur.
-        // if (sauce.userId != req.auth.userId) {
-        //   res.status(401).json({ message: "Vous n'etes pas authorisé à modifer cette sauce" });
-        // } else {
-          // Met à jour la sauce dans la base de données en utilisant les données de "sauceObject".
+
           Sauces.updateOne(
             { _id: sauceId },
             { ...saucesObject, _id: sauceId }
@@ -154,21 +139,23 @@ exports.getALLSauces = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-//fonction "likeSauces" pour liker ou disliker une sauce
 exports.likeSauces = (req, res) => {
-  //"findOne" pour trouver une sauce en fonction de son ID
+  // Recherche d'une sauce en utilisant l'ID fourni dans la requête
   Sauces.findOne({ _id: req.params.id })
     .then((sauces) => {
+      // Si l'utilisateur a indiqué un "like" dans la requête, incrémentez le nombre de likes pour la sauce et ajoutez l'ID de l'utilisateur à la liste "usersLiked"
       if (req.body.like === 1) {
         sauces.likes++;
         sauces.usersLiked.push(req.body.userId);
         sauces.save();
       }
+      // Si l'utilisateur a indiqué un "dislike" dans la requête, incrémentez le nombre de dislikes pour la sauce et ajoutez l'ID de l'utilisateur à la liste "usersDisliked"
       if (req.body.like === -1) {
         sauces.dislikes++;
         sauces.usersDisliked.push(req.body.userId);
         sauces.save();
       }
+      // Si l'utilisateur a annulé son vote, décrémentez le nombre de likes ou de dislikes en fonction de l'endroit où se trouve l'ID de l'utilisateur
       if (req.body.like === 0) {
         if (sauces.usersLiked.indexOf(req.body.userId) != -1) {
           sauces.likes--;
@@ -185,7 +172,11 @@ exports.likeSauces = (req, res) => {
         }
         sauces.save();
       }
+      // Renvoie un message de succès avec un statut HTTP 200
       res.status(200).json({ message: "like modifié" });
     })
-    .catch((error) => res.status(500).json({ error }));
+    .catch((error) => {
+      // Si une erreur se produit, renvoie un message d'erreur avec un statut HTTP 500
+      res.status(500).json({ error });
+    });
 };

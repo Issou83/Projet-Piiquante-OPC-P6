@@ -139,32 +139,45 @@ exports.getALLSauces = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
+// Exportation de la fonction "likeSauces" pour être utilisée en dehors de ce fichier
 exports.likeSauces = (req, res) => {
-  // Recherche d'une sauce en utilisant l'ID fourni dans la requête
+  // Utilisation de la méthode "findOne" de la bibliothèque "Sauces" pour trouver une sauce en utilisant l'ID fourni dans la requête
   Sauces.findOne({ _id: req.params.id })
     .then((sauces) => {
-      // Si l'utilisateur a indiqué un "like" dans la requête, incrémentez le nombre de likes pour la sauce et ajoutez l'ID de l'utilisateur à la liste "usersLiked"
+      // Vérification de la valeur "like" envoyée dans la requête
+      // Si la valeur est égale à 1, cela signifie que l'utilisateur a aimé la sauce
       if (req.body.like === 1) {
+        // Incrémenter le nombre de "likes" pour la sauce trouvée
         sauces.likes++;
+        // Ajouter l'ID de l'utilisateur à la liste "usersLiked" de la sauce
         sauces.usersLiked.push(req.body.userId);
+        // Enregistrer les modifications dans la base de données
         sauces.save();
       }
-      // Si l'utilisateur a indiqué un "dislike" dans la requête, incrémentez le nombre de dislikes pour la sauce et ajoutez l'ID de l'utilisateur à la liste "usersDisliked"
+      // Si la valeur est égale à -1, cela signifie que l'utilisateur n'a pas aimé la sauce
       if (req.body.like === -1) {
+        // Incrémenter le nombre de "dislikes" pour la sauce trouvée
         sauces.dislikes++;
+        // Ajouter l'ID de l'utilisateur à la liste "usersDisliked" de la sauce
         sauces.usersDisliked.push(req.body.userId);
+        // Enregistrer les modifications dans la base de données
         sauces.save();
       }
-      // Si l'utilisateur a annulé son vote, décrémentez le nombre de likes ou de dislikes en fonction de l'endroit où se trouve l'ID de l'utilisateur
+      // Si la valeur est égale à 0, cela signifie que l'utilisateur a annulé son vote
       if (req.body.like === 0) {
+        // Vérifier si l'ID de l'utilisateur se trouve dans la liste "usersLiked"
         if (sauces.usersLiked.indexOf(req.body.userId) != -1) {
+          // Si oui, décrémenter le nombre de "likes" pour la sauce
           sauces.likes--;
+          // Supprimer l'ID de l'utilisateur de la liste "usersLiked"
           sauces.usersLiked.splice(
             sauces.usersLiked.indexOf(req.body.userId),
             1
           );
         } else {
+          // Si non, décrémenter le nombre de "dislikes" pour la sauce
           sauces.dislikes--;
+          // Supprimer l'ID de l'utilisateur de la liste "usersDisliked"
           sauces.usersDisliked.splice(
             sauces.usersDisliked.indexOf(req.body.userId),
             1

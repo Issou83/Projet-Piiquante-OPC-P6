@@ -23,7 +23,6 @@ const normalizePort = (val) => {
 };
 
 // Définition du port à utiliser pour le serveur
-//Si l'environnement sur lequel tourne le server definit le port/Sinon le port 3000 sera utilisé
 const port = normalizePort(process.env.PORT);
 
 // Définition du port pour l'application avec la methode "set"
@@ -54,13 +53,18 @@ const errorHandler = (error) => {
   }
 };
 
+app.use((req, res) => {
+  res.json({ message: 'Votre requête a bien été reçue !' }); 
+});
+
+
 // Création du serveur HTTP
 const server = http.createServer(app);
 
 // En cas d'erreur, appeler la fonction errorHandler
 server.on("error", errorHandler);
 
-// Écouter les événements "listening"
+//Fonction qui nous confirme que le serveur est bien en ecoute sur le port 3000
 server.on("listening", () => {
   const address = server.address();
   const bind = typeof address === "string" ? "pipe" + address : "port" + port;

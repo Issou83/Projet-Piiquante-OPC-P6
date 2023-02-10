@@ -1,4 +1,6 @@
+//On importe Express car il detient la fonction router
 const express = require('express');
+
 const router = express.Router();
 const auth = require('../middleware/auth');
 

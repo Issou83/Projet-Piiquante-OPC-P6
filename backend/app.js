@@ -1,7 +1,8 @@
 // On importe les bibliothèques 'express', 'body-parser', 'mongoose', 'path'
 const express = require("express");
-// const bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
 
+//Package qui permet d'acceder au variables d'environnements
 const dotenv = require("dotenv");
 dotenv.config({
   path: ".env"
@@ -53,6 +54,7 @@ Configurer les bons headers sur l'objet réponse permet l'envoi et la réception
 
 // On autorise les requêtes CORS (Cross-Origin Resource Sharing) depuis n'importe quelle origine
 //Le middleware ne prend pas d'adresse en premier paramètre, afin de s'appliquer à toutes les routes
+//bloque les connection qui n'ont pas la meme origine
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization");
@@ -68,7 +70,7 @@ app.use('/api/sauces', saucesRoutes);
 app.use('/api/auth', userRoutes);
 
 // On utilise le parseur de corps de requête pour extraire les données JSON
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 
 // On exporte l'application express
 module.exports = app;
